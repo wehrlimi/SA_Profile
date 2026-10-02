@@ -76,12 +76,13 @@ SA_Profile/
 │   ├── axial_landmarks/best_model.pt   # Pretrained axial landmark U-Net
 │   └── sagittal_bounds/best_model.pt   # Pretrained sagittal bounds U-Net
 ├── scripts/
-│   ├── two_stage_inference.py          # End-to-end inference on a 3D NIfTI volume
+│   ├── inference_run_full_pipeline.py  # End-to-end pipeline (Sagittal bounds -> Axial heatmaps -> MLE splines -> SA)
+│   ├── compute_sulcus_angles_spline_leo.py # MLE spline fitting via L-BFGS-B & adaptive control points (Paper method)
+│   ├── two_stage_inference_heatmaps.py # Predicts 3D probability heatmap volumes
+│   ├── interactive_curve_viewer_leo.py # Interactive GUI for visualizing MLE splines over heatmaps
 │   ├── train_two_stage.py              # Two-stage U-Net training pipeline
-│   ├── compute_sulcus_angles_spline.py # Continuous SA profile computation & spline fitting
-│   ├── fit_3d_lines_from_heatmaps.py   # 3D landmark line fitting across volume
-│   ├── compare_medical_evaluation.py   # Population analysis & comparison with manual reads
-│   └── detailed_case_figure.py         # Visualizing individual SA profiles & overlays
+│   ├── compare_medical_evaluation.py   # Clinical validation & comparison with manual measurements
+│   └── detailed_case_figure.py         # Visualizing individual patient SA profiles & MRI overlays
 ├── assets/                             # Figures and architectural diagrams
 │   ├── fig1_overview.png               # Method pipeline overview (Figure 1)
 │   ├── fig4_sa_profiles.png            # Example patient SA profiles (Figure 4)
@@ -116,31 +117,47 @@ cd ..
 
 Pretrained checkpoints for both the sagittal bounds and axial landmark models are provided directly in `checkpoints/`.
 
-### Running Automated SA Profiling on a 3D MRI Volume
+### End-to-End Inference with Maximum Likelihood Estimated Splines
 
-Given a reconstructed 3D knee MRI volume in NIfTI format (`.nii` or `.nii.gz`):
+To run the complete automated pipeline on a 3D knee MRI scan (as described in Section 2 of the paper):
+1. Detects sagittal trochlear boundaries ($S_1, S_2$)
+2. Generates probabilistic landmark heatmaps ($T_1\text{--}T_3$) across all axial slices
+3. Fits 3D splines by maximizing log-likelihood ($\sum_z \log H_z^l$) via L-BFGS-B with adaptive control points
+4. Outputs continuous sulcus angle profiles, 3D Slicer markups, and visual summaries
 
 ```bash
-python scripts/two_stage_inference.py \
+python scripts/inference_run_full_pipeline.py \
     --config config.yaml \
     --sagittal_model checkpoints/sagittal_bounds/best_model.pt \
     --axial_model checkpoints/axial_landmarks/best_model.pt \
-    --input_volume /path/to/volume.nii.gz \
-    --output predictions.json
+    --input_dir /path/to/scan.nii.gz \
+    --output inference_output
 ```
 
-The output JSON will contain:
-- `bounds`: Cranial and caudal slice limits (`z_min`, `z_max`)
-- `landmarks`: Predicted coordinates for each slice in the trochlear region
+*Note: `--input_dir` accepts either a single `.nii`/`.nii.gz` file or a directory of multiple scans for batch processing.*
 
-### Continuous Sulcus Angle Profiling
+#### Generated Outputs per Case:
+- `sulcus_angles_<case_id>.json`: Continuous sulcus angle profile measurements and fitted 3D spline coordinates
+- `AxialLabels_fitted_<case_id>.mrk.json`: MLE spline-fitted landmarks in 3D Slicer markup format
+- `AxialLabels_<case_id>.mrk.json`: Raw per-slice argmax landmarks
+- `SaggitalBounds_<case_id>.mrk.json`: Detected craniocaudal trochlear bounds ($S_1, S_2$)
+- `<case_id>_axial_heatmaps_sum_slicer.nii.gz`: 3D heatmap probability volume aligned with the MRI scan
 
-Compute continuous sulcus angle curves from predicted landmark points:
-```bash
-python scripts/compute_sulcus_angles_spline.py \
-    --predictions predictions.json \
-    --output_plot sa_profile.png
-```
+---
+
+### Interactive Visualization & Analysis
+
+- **Interactive Curve & Heatmap Viewer**: Explore the fitted MLE splines over stacked slice heatmaps in an interactive GUI:
+  ```bash
+  python scripts/interactive_curve_viewer_leo.py \
+      --heatmap_npz inference_output/<case_id>/axial_heatmaps.npz
+  ```
+- **Cohort-Level Summary Plots**: Aggregate continuous SA profiles across a cohort:
+  ```bash
+  python scripts/compute_sulcus_angles_spline_leo.py \
+      --input_dir inference_output \
+      --output cohort_sa_summary.png
+  ```
 
 ---
 

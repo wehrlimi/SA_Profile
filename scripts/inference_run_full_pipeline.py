@@ -276,12 +276,15 @@ def main() -> None:
         z_margin=cfg.inference.get("z_margin", 5),
     )
 
-    input_dir = Path(args.input_dir)
-    if not input_dir.is_dir():
-        raise ValueError(f"--input_dir is not a directory: {input_dir}")
-    input_paths = sorted(input_dir.glob("*.nii.gz")) + sorted(input_dir.glob("*.nii"))
-    if not input_paths:
-        raise ValueError(f"No NIfTI files found in {input_dir}")
+    input_path_obj = Path(args.input_dir)
+    if input_path_obj.is_file():
+        input_paths = [input_path_obj]
+    elif input_path_obj.is_dir():
+        input_paths = sorted(input_path_obj.glob("*.nii.gz")) + sorted(input_path_obj.glob("*.nii"))
+        if not input_paths:
+            raise ValueError(f"No NIfTI files found in {input_path_obj}")
+    else:
+        raise ValueError(f"--input_dir path does not exist: {input_path_obj}")
 
     output_root = Path(args.output)
     output_root.mkdir(parents=True, exist_ok=True)
