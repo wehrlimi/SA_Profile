@@ -1,0 +1,10 @@
+# Additional requirements for Muon optimizer support
+# Install with: pip install -r requirements_muon.txt
+
+# Muon optimizer (install from GitHub)
+git+https://github.com/KellerJordan/Muon
+
+# PyYAML is already included in the conda environment
+# If using pip only, uncomment:
+# pyyaml>=6.0
+

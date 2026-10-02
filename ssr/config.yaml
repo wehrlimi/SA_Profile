@@ -1,0 +1,59 @@
+# SSR Training Configuration File
+
+# Device settings
+cuda_device: "0"  # GPU device ID or "cpu"
+device: "cuda"  # "cuda" or "cpu"
+
+# Data paths
+data:
+  ax_path: "inputs/FB_100116____FB,3230126791_study_20b85c56_MR5_ddbc11c8_PD FS SAG.nii.gz"
+  cor_path: "inputs/FB_100116____FB,3230126791_study_20b85c56_MR2_edaaa86c_PD AXIAL FAT SAT.nii.gz"
+  sag_path: "inputs/FB_100116____FB,3230126791_study_20b85c56_MR3_da36d2c3_PD FS COR.nii.gz"
+
+# Training settings
+training:
+  batch_size: 4096  # 2048 * 2
+  num_epochs: 50
+  num_workers: 16
+
+# Model architecture
+model:
+  type: "WIREMLP"  # "WIREMLP" or "ReLUMLP"
+  in_size: 3
+  out_size: 3
+  hidden_size: 1024
+  num_layers: 4
+  wire_omega: 10.0
+  wire_sigma: 20.0
+  pos_encoder: null  # null, "FourierFeat", or "NeRF"
+
+# Optimizer settings
+optimizer:
+  type: "muon"  # "adam" or "muon"
+  # Adam settings (used for auxiliary params when using Muon, or all params when using Adam)
+  lr: 4e-4
+  weight_decay: 0.0
+  betas: [0.9, 0.999]
+  # Muon-specific settings (only used when optimizer.type == "muon")
+  muon_lr: 1e-3  # Learning rate for hidden layer weights
+  muon_weight_decay: 0.0
+  muon_aux_weight_decay: 0.0  # Weight decay for auxiliary Adam params
+
+# Scheduler settings
+scheduler:
+  type: "cosine"  # "cosine", "step", or null
+  T_max: 100  # For CosineAnnealingLR
+  step_size: 50  # For StepLR
+  gamma: 0.9  # For StepLR
+  eta_min: 0.000001  # For CosineAnnealingLR (1e-6)
+
+# Logging and output
+logging:
+  log_dir: "tb_logs"
+  save_images_dir: "./images_dir"
+  log_interval: 25  # Log every N epochs
+
+# Output resolution for final sampling
+output:
+  resolution: [256, 256, 256]
+

@@ -1,0 +1,76 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# C extensions & build
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE and editors
+.idea/
+.vscode/
+.ai/
+*.swp
+*.swo
+*~
+
+# Operating System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Logs & TensorBoard
+*.log
+tb_logs/
+
+# Data and large volume files (prevent accidental commit of imaging data)
+*.nii
+*.nii.gz
+*.mrk.json
+*.dcm
+*.mha
+*.mhd
+inputs/
+dataset/
+images_dir/
+temp_lakefs/
+
+# Local cache and temporary outputs
+cache/
+tmp/
+tmp_old/
+inference_data/
+inference_data_all/
+inference_output/
+inference_output_*
+viz_overlay/
+volume_render/
+Medical_Evaluation/
+Noel_fastMRI_*
+comparison_*.png
+comparison_*.pdf
+*.txt
+!requirements*.txt
+!*requirements*.txt

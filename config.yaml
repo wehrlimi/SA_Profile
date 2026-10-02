@@ -1,0 +1,85 @@
+lakefs:
+  s3_endpoint: "https://dbe-lakefs.dbe.unibas.ch:8000"
+  ca_path: ""
+  repository: "fastmri-knee"
+  branch: "Landmark_Detection_Noel"
+  paths: ["Noel_fastMRI_and_UKBB_labeled_23_02_2026_nii_included_EDWIN_controlled"]
+
+data:
+  split:
+    train: 70
+    val: 10
+    test: 20
+  data_split_path: "tmp/"
+  local_cache_path: "cache/"
+  landmark_names: ["A0", "A1", "A2", "LA_0", "LA_1", "LB_0", "LB_1"]
+
+augmentation:
+  rotate_prob: 0.5 # 1.0
+  rotate_limit: [-20, 20] #[-180, 180]
+  gauss_noise_prob: 0.75
+  gauss_noise_std_range: [0.0, 0.01]
+  brightness_prob: 0.75
+  brightness_limit: [-0.2, 0.2]
+  contrast_limit: [-0.2, 0.2]
+  elastic_deform_prob: 0.25
+  elastic_deform_alpha: 50.
+  elastic_deform_sigma: 100.
+  mult_noise_prob: 0.1
+  mult_noise_factor: [0.9, 1.1]
+
+program:
+  mode: "train"
+  labels: []
+  image_size: 256
+  result_path: "tmp/result/"
+  checkpoint_path: "tmp/checkpoints/"
+  data_loader:
+    batch_size: 16
+    num_workers: 4
+    persistent_workers: false
+
+evaluation:
+  create_images_epochs: [50, 100, 200]
+  result_path: "tmp/evaluation_results/"
+
+testing:
+  result_path: "tmp/testing_results/"
+
+inference:
+  data_path: ""
+  result_path: ""
+
+training:
+  use_augmentation: True
+  num_epoch: 100
+  eval_each_epoch: 1
+  save_each_epoch: 25
+
+optimizer:
+  name: "adamw"
+  lr: 1e-3
+  lr_decay: 0.9
+  lr_min: 1e-7
+  weight_decay: 1e-5
+
+model:
+  down_channels: [16, 16, 16, 32]
+  down_layers: [2, 2, 4, 4]
+  bottleneck_channels: 32
+  bottleneck_layers: 6
+  up_channels: [32, 16, 16, 16]
+  up_layers: [4, 4, 2, 2]
+  dropout_p: 0.0
+  residual: True
+  keypoint_extraction: "argmax"
+
+device:
+  type: "cuda"
+  gpu_id: 0
+
+seeds:
+  datasplit: 123456
+  torch: 123456
+  numpy: 123456
+  sklearn: 123456

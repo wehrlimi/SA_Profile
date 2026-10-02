@@ -1,0 +1,14 @@
+name: knee
+channels:
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
+dependencies:
+  - pytorch-gpu
+  - torchvision
+  - conda-forge::omegaconf
+  - tensorboard
+  - nibabel
+  - boto3
+  - albumentations
+  - matplotlib
+prefix: /path/to/anaconda3/envs/knee
